@@ -29,4 +29,16 @@ class CurrencyDecimalTests: XCTestCase {
         
         XCTAssertEqual(first + second, CurrencyDecimal(string: "64.98")!)
     }
+    
+    func testIncrement() {
+        var first = CurrencyDecimal(string: "59.99")!
+        first += 1
+        XCTAssertEqual(first, CurrencyDecimal(string: "60.99")!)
+    }
+    
+    func testDecrement() {
+        var first = CurrencyDecimal(string: "59.99")!
+        first -= 1
+        XCTAssertEqual(first, CurrencyDecimal(string: "58.99")!)
+    }
 }

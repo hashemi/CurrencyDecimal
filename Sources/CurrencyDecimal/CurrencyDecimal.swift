@@ -15,7 +15,7 @@ extension Character {
 struct CurrencyDecimal {
     static let fixedDecimalPlaces = 3
     
-    private let value: Int
+    private var value: Int
     
     private init(value: Int) {
         self.value = value
@@ -111,5 +111,13 @@ extension CurrencyDecimal {
     
     public static func -(lhs: CurrencyDecimal, rhs: CurrencyDecimal) -> CurrencyDecimal {
         return self.init(value: lhs.value - rhs.value)
+    }
+    
+    public static func +=(_ lhs: inout CurrencyDecimal, _ rhs: CurrencyDecimal) {
+        lhs.value += rhs.value
+    }
+    
+    public static func -=(_ lhs: inout CurrencyDecimal, _ rhs: CurrencyDecimal) {
+        lhs.value -= rhs.value
     }
 }
