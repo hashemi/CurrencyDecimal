@@ -13,26 +13,26 @@ extension Character {
 }
 
 private let fixedDecimalPlaces = 4
-private let powersOf10 = [1, 10, 100, 1000, 10000]
+private let powersOf10: [Int64] = [1, 10, 100, 1000, 10000]
 
 struct CurrencyDecimal {
-    private var value: Int
+    private var value: Int64
     
-    private init(value: Int) {
+    private init(value: Int64) {
         self.value = value
     }
     
     public init(double: Double) {
-        self.value = Int(double * Double(powersOf10[fixedDecimalPlaces]))
+        self.value = Int64(double * Double(powersOf10[fixedDecimalPlaces]))
     }
 }
 
 extension CurrencyDecimal {
-    public init(tenthousandths: Int) {
+    public init(tenthousandths: Int64) {
         self.value = tenthousandths
     }
     
-    var tenthousandths: Int { return value }
+    var tenthousandths: Int64 { return value }
 }
 
 extension CurrencyDecimal: CustomStringConvertible {
@@ -42,7 +42,7 @@ extension CurrencyDecimal: CustomStringConvertible {
             case afterDecimal
         }
         
-        var value: Int = 0
+        var value: Int64 = 0
         var isNegative = false
         var current = string.startIndex
         var state: State = .beforeDecimal
@@ -54,11 +54,11 @@ extension CurrencyDecimal: CustomStringConvertible {
             case (.beforeDecimal, "-") where current == string.startIndex:
                 isNegative = true
             case (.beforeDecimal, _) where c.isDigit:
-                value = (value * 10) + c.digitValue!
+                value = (value * 10) + Int64(c.digitValue!)
             case (.beforeDecimal, "."):
                 state = .afterDecimal
             case (.afterDecimal, _) where c.isDigit:
-                value = (value * 10) + c.digitValue!
+                value = (value * 10) + Int64(c.digitValue!)
                 decimalPlaces += 1
             default:
                 return nil
@@ -100,7 +100,7 @@ extension CurrencyDecimal: CustomStringConvertible {
 
 extension CurrencyDecimal: Hashable, Comparable {
     var hashValue: Int {
-        return value
+        return value.hashValue
     }
     
     static func <(lhs: CurrencyDecimal, rhs: CurrencyDecimal) -> Bool {
@@ -113,7 +113,7 @@ extension CurrencyDecimal: Hashable, Comparable {
 }
 
 extension CurrencyDecimal: ExpressibleByIntegerLiteral {
-    init(integerLiteral value: Int) {
+    init(integerLiteral value: Int64) {
         self.init(value: value * powersOf10[fixedDecimalPlaces])
     }
 }
