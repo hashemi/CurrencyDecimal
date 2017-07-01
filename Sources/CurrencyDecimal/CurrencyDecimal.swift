@@ -3,62 +3,79 @@ extension Character {
         return self >= "0" && self <= "9"
     }
     
-    var isMinusSign: Bool {
-        return self == "-"
-    }
-    
-    var isDecimalPoint: Bool {
-        return self == "."
+    var digitValue: Int? {
+        let mapping: [Character: Int] = [
+            "0": 0, "1": 1, "2": 2, "3": 3, "4": 4,
+            "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
+        ]
+        return mapping[self]
     }
 }
 
 struct CurrencyDecimal {
-    let beforeDecimal: String
-    let afterDecimal: String
+    static let fixedDecimalPlaces = 3
+    
+    let value: Int
     
     init?(string: String) {
+        enum State {
+            case beforeDecimal
+            case afterDecimal
+        }
+        
+        var value: Int = 0
+        var isNegative = false
         var current = string.startIndex
+        var state: State = .beforeDecimal
+        var decimalPlaces = 0
         
-        @discardableResult func advance() -> Character {
-            guard current < string.endIndex
-                else { return "\0" }
-            let cc = string[current]
+        while current < string.endIndex {
+            let c = string[current]
+            switch (state, c) {
+            case (.beforeDecimal, "-") where current == string.startIndex:
+                isNegative = true
+            case (.beforeDecimal, _) where c.isDigit:
+                value = (value * 10) + c.digitValue!
+            case (.beforeDecimal, "."):
+                state = .afterDecimal
+            case (.afterDecimal, _) where c.isDigit:
+                value = (value * 10) + c.digitValue!
+                decimalPlaces += 1
+            default:
+                return nil
+            }
+            
             current = string.index(after: current)
-            return cc
         }
         
-        @discardableResult func peek() -> Character {
-            let peekIdx = string.index(after: current)
-            guard peekIdx < string.endIndex else { return "\0" }
-            return string[peekIdx]
-        }
         
-        // first character can be minus sign
-        if peek().isMinusSign { advance() }
-        
-        // as many digits as possible
-        while peek().isDigit { advance() }
-        
-        // digits before decimal, incluing minus sign
-        beforeDecimal = String(string[...current])
-        
-        // skip over decimal, if present
-        if peek().isDecimalPoint { advance() }
-        
-        // as many digits as possible, after decimal sign
-        let afterDecimalStartIdx = string.index(after: current)
-        while peek().isDigit { advance() }
-        
-        afterDecimal = String(string[afterDecimalStartIdx...current])
-        
-        // if not at the end of the string now, failed to parse a decimal
-        if peek() != "\0" {
+        if decimalPlaces > CurrencyDecimal.fixedDecimalPlaces {
             return nil
         }
-    }
-    
-    var stringValue: String {
-        return "\(beforeDecimal).\(afterDecimal)"
+        
+        let decimalOffset = CurrencyDecimal.fixedDecimalPlaces - decimalPlaces
+        value *= [0, 10, 100, 1000][decimalOffset]
+        
+        if isNegative { value *= -1 }
+        
+        self.value = value
     }
 }
 
+extension CurrencyDecimal: CustomStringConvertible {
+    var description: String {
+        let sign = value < 0 ? "-" : ""
+        let absValue = abs(value)
+        
+        if absValue < 10 { return "\(sign)0.00\(value)" }
+        if absValue < 100 { return "\(sign)0.0\(value)" }
+        if absValue < 1000 { return "\(sign)0.\(value)" }
+        
+        let string = absValue.description
+        
+        let beforeDecimal = string.prefix(string.count - CurrencyDecimal.fixedDecimalPlaces)
+        let afterDecimal = string.suffix(CurrencyDecimal.fixedDecimalPlaces)
+        
+        return "\(sign)\(beforeDecimal).\(afterDecimal)"
+    }
+}
