@@ -12,9 +12,10 @@ extension Character {
     }
 }
 
+private let fixedDecimalPlaces = 4
+private let powersOf10 = [1, 10, 100, 1000, 10000]
+
 struct CurrencyDecimal {
-    static let fixedDecimalPlaces = 3
-    
     private var value: Int
     
     private init(value: Int) {
@@ -22,8 +23,16 @@ struct CurrencyDecimal {
     }
     
     public init(double: Double) {
-        self.value = Int(double * 1000)
+        self.value = Int(double * Double(powersOf10[fixedDecimalPlaces]))
     }
+}
+
+extension CurrencyDecimal {
+    public init(tenthousandths: Int) {
+        self.value = tenthousandths
+    }
+    
+    var tenthousandths: Int { return value }
 }
 
 extension CurrencyDecimal: CustomStringConvertible {
@@ -59,12 +68,12 @@ extension CurrencyDecimal: CustomStringConvertible {
         }
         
         
-        if decimalPlaces > CurrencyDecimal.fixedDecimalPlaces {
+        if decimalPlaces > fixedDecimalPlaces {
             return nil
         }
         
-        let decimalOffset = CurrencyDecimal.fixedDecimalPlaces - decimalPlaces
-        value *= [1, 10, 100, 1000][decimalOffset]
+        let decimalOffset = fixedDecimalPlaces - decimalPlaces
+        value *= powersOf10[decimalOffset]
         
         if isNegative { value *= -1 }
         
@@ -75,14 +84,15 @@ extension CurrencyDecimal: CustomStringConvertible {
         let sign = value < 0 ? "-" : ""
         let absValue = abs(value)
         
-        if absValue < 10 { return "\(sign)0.00\(absValue)" }
-        if absValue < 100 { return "\(sign)0.0\(absValue)" }
-        if absValue < 1000 { return "\(sign)0.\(absValue)" }
+        if absValue < 10    { return "\(sign)0.000\(absValue)" }
+        if absValue < 100   { return "\(sign)0.00\(absValue)"  }
+        if absValue < 1000  { return "\(sign)0.0\(absValue)"   }
+        if absValue < 10000 { return "\(sign)0.\(absValue)"    }
         
         let string = absValue.description
         
-        let beforeDecimal = string.prefix(string.count - CurrencyDecimal.fixedDecimalPlaces)
-        let afterDecimal = string.suffix(CurrencyDecimal.fixedDecimalPlaces)
+        let beforeDecimal = string.prefix(string.count - fixedDecimalPlaces)
+        let afterDecimal = string.suffix(fixedDecimalPlaces)
         
         return "\(sign)\(beforeDecimal).\(afterDecimal)"
     }
@@ -104,7 +114,7 @@ extension CurrencyDecimal: Hashable, Comparable {
 
 extension CurrencyDecimal: ExpressibleByIntegerLiteral {
     init(integerLiteral value: Int) {
-        self.init(value: value * 1000)
+        self.init(value: value * powersOf10[fixedDecimalPlaces])
     }
 }
 
