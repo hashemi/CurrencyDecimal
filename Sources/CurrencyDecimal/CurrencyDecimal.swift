@@ -20,6 +20,10 @@ struct CurrencyDecimal {
     private init(value: Int) {
         self.value = value
     }
+    
+    public init(double: Double) {
+        self.value = Int(double * 1000)
+    }
 }
 
 extension CurrencyDecimal: CustomStringConvertible {

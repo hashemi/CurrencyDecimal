@@ -11,7 +11,7 @@ class CurrencyDecimalTests: XCTestCase {
     }
     
     func testMultipleDecimals() {
-        XCTAssertEqual(CurrencyDecimal(string: "1..1")?.description, nil)
+        XCTAssertNil(CurrencyDecimal(string: "1..1"))
     }
     
     func testNegativeNumber() {
@@ -41,4 +41,9 @@ class CurrencyDecimalTests: XCTestCase {
         first -= 1
         XCTAssertEqual(first, CurrencyDecimal(string: "58.99")!)
     }
+    
+    func testDouble() {
+        XCTAssertEqual(CurrencyDecimal(double: 58.99), CurrencyDecimal(string: "58.99")!)
+    }
+    
 }
