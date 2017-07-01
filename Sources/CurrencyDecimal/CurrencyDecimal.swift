@@ -15,8 +15,14 @@ extension Character {
 struct CurrencyDecimal {
     static let fixedDecimalPlaces = 3
     
-    let value: Int
+    private let value: Int
     
+    private init(value: Int) {
+        self.value = value
+    }
+}
+
+extension CurrencyDecimal: CustomStringConvertible {
     init?(string: String) {
         enum State {
             case beforeDecimal
@@ -60,9 +66,7 @@ struct CurrencyDecimal {
         
         self.value = value
     }
-}
-
-extension CurrencyDecimal: CustomStringConvertible {
+    
     var description: String {
         let sign = value < 0 ? "-" : ""
         let absValue = abs(value)
@@ -77,5 +81,35 @@ extension CurrencyDecimal: CustomStringConvertible {
         let afterDecimal = string.suffix(CurrencyDecimal.fixedDecimalPlaces)
         
         return "\(sign)\(beforeDecimal).\(afterDecimal)"
+    }
+}
+
+extension CurrencyDecimal: Hashable, Comparable {
+    var hashValue: Int {
+        return value
+    }
+    
+    static func <(lhs: CurrencyDecimal, rhs: CurrencyDecimal) -> Bool {
+        return lhs.value < rhs.value
+    }
+    
+    static func ==(lhs: CurrencyDecimal, rhs: CurrencyDecimal) -> Bool {
+        return lhs.value == rhs.value
+    }
+}
+
+extension CurrencyDecimal: ExpressibleByIntegerLiteral {
+    init(integerLiteral value: Int) {
+        self.init(value: value * 1000)
+    }
+}
+
+extension CurrencyDecimal {
+    public static func +(lhs: CurrencyDecimal, rhs: CurrencyDecimal) -> CurrencyDecimal {
+        return self.init(value: lhs.value + rhs.value)
+    }
+    
+    public static func -(lhs: CurrencyDecimal, rhs: CurrencyDecimal) -> CurrencyDecimal {
+        return self.init(value: lhs.value - rhs.value)
     }
 }
