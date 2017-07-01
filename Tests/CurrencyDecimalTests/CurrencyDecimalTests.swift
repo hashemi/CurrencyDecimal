@@ -46,4 +46,7 @@ class CurrencyDecimalTests: XCTestCase {
         XCTAssertEqual(CurrencyDecimal(double: 58.99), CurrencyDecimal(string: "58.99")!)
     }
     
+    func testNegativeUnderOne() {
+        XCTAssertEqual(CurrencyDecimal(string: "-0.123")!.description, "-0.123")
+    }
 }

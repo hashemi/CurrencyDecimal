@@ -64,7 +64,7 @@ extension CurrencyDecimal: CustomStringConvertible {
         }
         
         let decimalOffset = CurrencyDecimal.fixedDecimalPlaces - decimalPlaces
-        value *= [0, 10, 100, 1000][decimalOffset]
+        value *= [1, 10, 100, 1000][decimalOffset]
         
         if isNegative { value *= -1 }
         
@@ -75,9 +75,9 @@ extension CurrencyDecimal: CustomStringConvertible {
         let sign = value < 0 ? "-" : ""
         let absValue = abs(value)
         
-        if absValue < 10 { return "\(sign)0.00\(value)" }
-        if absValue < 100 { return "\(sign)0.0\(value)" }
-        if absValue < 1000 { return "\(sign)0.\(value)" }
+        if absValue < 10 { return "\(sign)0.00\(absValue)" }
+        if absValue < 100 { return "\(sign)0.0\(absValue)" }
+        if absValue < 1000 { return "\(sign)0.\(absValue)" }
         
         let string = absValue.description
         
