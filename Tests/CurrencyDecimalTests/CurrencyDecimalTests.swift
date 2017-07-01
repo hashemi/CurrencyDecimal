@@ -57,4 +57,8 @@ class CurrencyDecimalTests: XCTestCase {
     func testTenthousandthValue() {
         XCTAssertEqual(CurrencyDecimal(string: "-0.123")?.tenthousandths, -1230)
     }
+    
+    func testInitWithDouble() {
+        XCTAssertEqual(CurrencyDecimal(double: -0.123), CurrencyDecimal(string: "-0.123"))
+    }
 }
